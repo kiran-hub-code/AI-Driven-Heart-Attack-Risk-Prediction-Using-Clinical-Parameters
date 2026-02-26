@@ -1,1 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeartCare AI - Risk Prediction</title>
+    
+    <!-- Include external JS files -->
+    <script src="galaxy.js" defer></script>
+    <script src="script.js" defer></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+            background: #000000;
+            color: #ffffff;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        body.light-mode {
+            background: #f8f9fa;
+            color: #1a1a1a;
+        }
+
+        /* ===== GALAXY BACKGROUND (REPLACED) ===== */
+        .galaxy-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            z-index: 0;
+            pointer-events: auto; /* Enable mouse interaction */
+        }
+
+        body.light-mode .galaxy-background {
+            background: #f8f9fa;
+        }
+
+        /* REMOVED: Old star/nebula animation code */
+
+        /* ===== CONTENT WRAPPER ===== */
+        .content {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+        }
+
+        /* ===== NAVIGATION ===== */
+        .navbar {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            padding: 12px 20px;
+            background: rgba(10, 10, 30, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 200, 255, 0.1);
+            animation: slideDown 0.8s ease-out;
+        }
+
+        body.light-mode .navbar {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(100, 100, 100, 0.2);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .nav-item {
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: transparent;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+            text-transform: capitalize;
+        }
+
+        body.light-mode .nav-item {
+            border: 1px solid rgba(100, 100, 100, 0.3);
+            color: rgba(50, 50, 50, 0.7);
+        }
+
+        .nav-item:hover {
+            color: #00c8ff;
+            border-color: #00c8ff;
+            box-shadow: 0 0 20px rgba(0, 200, 255, 0.4), inset 0 0 20px rgba(0, 200, 255, 0.1);
+        }
+
+        .nav-item.active {
+            color: #00c8ff;
+            border-color: #00c8ff;
+            background: rgba(0, 200, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 200, 255, 0.5), inset 0 0 20px rgba(0, 200, 255, 0.15);
+        }
+
+        .nav-controls {
+            display: flex;
+            gap: 8px;
+            margin-left: 8px;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            padding-left: 8px;
+        }
+
+        body.light-mode .nav-controls {
+            border-left: 1px solid rgba(100, 100, 100, 0.2);
+        }
+
+        .control-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: transparent;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        body.light-mode .control-btn {
+            border: 1px solid rgba(100, 100, 100, 0.3);
+            color: rgba(50, 50, 50, 0.7);
+        }
+
+        .control-btn:hover {
+            color: #00c8ff;
+            border-color: #00c8ff;
+            box-shadow: 0 0 15px rgba(0, 200, 255, 0.3);
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        .hero.hidden {
+            display: none;
+        }
+
+        .hero-card {
+            max-width: 600px;
+            width: 100%;
+            padding: 60px 40px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 48px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 200, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            animation: heroFadeIn 1s ease-out;
+            position: relative;
+        }
+
+        body.light-mode .hero-card {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(100, 100, 100, 0.2);
+            box-shadow: 0 8px 32px rgba(100, 100, 100, 0.1);
+        }
+
+        @keyframes heroFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-title {
+            font-size: clamp(32px, 6vw, 56px);
+            font-weight: 900;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #ffffff 0%, #00c8ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 200, 255, 0.4);
+            animation: floatTitle 4s ease-in-out infinite;
+        }
+
+        @keyframes floatTitle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
+        body.light-mode .hero-title {
+            background: linear-gradient(135deg, #333333 0%, #0099cc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: none;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(14px, 2vw, 18px);
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 40px;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+        }
+
+        body.light-mode .hero-subtitle {
+            color: rgba(50, 50, 50, 0.7);
+        }
+
+        .hero-ctas {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .glow-pill {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 60px;
+            background: radial-gradient(circle, rgba(0, 200, 255, 0.3) 0%, transparent 100%);
+            border-radius: 50%;
+            filter: blur(25px);
+            pointer-events: none;
+            animation: glowPulseWide 3s ease-in-out infinite;
+        }
+
+        @keyframes glowPulseWide {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.6; }
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 999px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.320, 1);
+            text-transform: capitalize;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: #ffffff;
+            color: #000000;
+            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 12px 32px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 200, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 200, 255, 0.15);
+            border-color: rgba(0, 200, 255, 0.5);
+            color: #00c8ff;
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 32px rgba(0, 200, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        body.light-mode .btn-primary {
+            background: #000000;
+            color: #ffffff;
+            box-shadow: 0 8px 24px rgba(100, 100, 100, 0.15);
+        }
+
+        body.light-mode .btn-primary:hover {
+            box-shadow: 0 12px 32px rgba(100, 100, 100, 0.25);
+        }
+
+        body.light-mode .btn-secondary {
+            background: rgba(100, 100, 100, 0.1);
+            color: rgba(50, 50, 50, 0.8);
+            border: 1px solid rgba(100, 100, 100, 0.3);
+        }
+
+        body.light-mode .btn-secondary:hover {
+            background: rgba(100, 150, 255, 0.15);
+            border-color: rgba(100, 150, 255, 0.5);
+            color: #0066cc;
+        }
+
+        /* ===== FORM SECTION ===== */
+        .form-section {
+            display: none;
+            min-height: 100vh;
+            padding: 100px 20px 40px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .form-section.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .form-card {
+            max-width: 600px;
+            width: 100%;
+            padding: 50px 40px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 48px;
+            box-shadow: 0 8px 32px rgba(0, 200, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        body.light-mode .form-card {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(100, 100, 100, 0.2);
+        }
+
+        .form-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff 0%, #00c8ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        body.light-mode .form-title {
+            background: linear-gradient(135deg, #333333 0%, #0099cc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-subtitle {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 30px;
+        }
+
+        body.light-mode .form-subtitle {
+            color: rgba(50, 50, 50, 0.6);
+        }
+
+        .step-indicator {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .step-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .step-dot.active {
+            background: #00c8ff;
+            box-shadow: 0 0 15px rgba(0, 200, 255, 0.6);
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: rgba(255, 255, 255, 0.8);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        body.light-mode label {
+            color: rgba(50, 50, 50, 0.8);
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        body.light-mode input,
+        body.light-mode select {
+            background: rgba(255, 255, 255, 0.6);
+            border: 2px solid rgba(100, 100, 100, 0.3);
+            color: #1a1a1a;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        body.light-mode input::placeholder {
+            color: rgba(50, 50, 50, 0.5);
+        }
+
+        input:focus,
+        select:focus {
+            outline: 3px solid rgba(14, 165, 255, 0.12);
+            background: rgba(255, 255, 255, 0.12);
+            border-color: #00c8ff;
+            box-shadow: 0 0 20px rgba(0, 200, 255, 0.3), inset 0 0 20px rgba(0, 200, 255, 0.05);
+        }
+
+        body.light-mode input:focus,
+        body.light-mode select:focus {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: #0099cc;
+            box-shadow: 0 0 15px rgba(100, 150, 255, 0.2);
+        }
+
+        select:focus-visible {
+            outline: 3px solid rgba(14, 165, 255, 0.12);
+        }
+
+        select {
+            z-index: 9999;
+            position: relative;
+        }
+
+        select option {
+            background: #1a1a2e;
+            color: #ffffff;
+            padding: 10px;
+        }
+
+        body.light-mode select option {
+            background: #ffffff;
+            color: #1a1a1a;
+        }
+
+        .input-error {
+            border-color: #ff6b6b !important;
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.3) !important;
+        }
+
+        .error-text {
+            font-size: 12px;
+            color: #ff6b6b;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .error-text.show {
+            display: block;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .form-buttons button {
+            flex: 1;
+        }
+
+        .form-step {
+            display: none;
+            animation: stepTransition 0.5s ease-out;
+        }
+
+        .form-step.active {
+            display: block;
+        }
+
+        @keyframes stepTransition {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ===== RESULTS SECTION ===== */
+        .results-section {
+            display: none;
+            min-height: 100vh;
+            padding: 100px 20px 40px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .results-section.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .results-card {
+            max-width: 700px;
+            width: 100%;
+            padding: 50px 40px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 48px;
+            box-shadow: 0 8px 32px rgba(0, 200, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            animation: slideUp 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        body.light-mode .results-card {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(100, 100, 100, 0.2);
+        }
+
+        /* ===== GAUGE STYLES ===== */
+        .risk-gauge-container {
+            width: 100%;
+            max-width: 280px;
+            margin: 40px auto;
+            position: relative;
+        }
+
+        .gauge-svg {
+            width: 100%;
+            height: auto;
+            display: block;
+            filter: drop-shadow(0 0 8px rgba(0, 200, 255, 0.2));
+        }
+
+        .gauge-circle {
+            stroke: url(#gaugeGradient);
+            stroke-linecap: round;
+            fill: none;
+            stroke-width: 8;
+        }
+
+        .gauge-text {
+            font-size: 52px;
+            font-weight: 900;
+            text-anchor: middle;
+            dominant-baseline: central;
+            fill: #f8fafc;
+            paint-order: stroke;
+            stroke: rgba(0, 0, 0, 0.5);
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        }
+
+        body.light-mode .gauge-text {
+            fill: #0b1220;
+            stroke: rgba(255, 255, 255, 0.6);
+            filter: drop-shadow(0 1px 2px rgba(255, 255, 255, 0.5));
+        }
+
+        .gauge-label {
+            font-size: 18px;
+            font-weight: 700;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            fill: #00c8ff;
+            opacity: 0;
+            animation: labelFadeIn 0.5s ease-out 1.2s forwards;
+        }
+
+        body.light-mode .gauge-label {
+            fill: #0099cc;
+        }
+
+        @keyframes labelFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .gauge-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        /* ===== FAQ SECTION ===== */
+        .faq-section {
+            display: none;
+            min-height: 100vh;
+            padding: 100px 20px 40px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .faq-section.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .faq-card {
+            max-width: 700px;
+            width: 100%;
+            padding: 50px 40px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 48px;
+            box-shadow: 0 8px 32px rgba(0, 200, 255, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        body.light-mode .faq-card {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(100, 100, 100, 0.2);
+        }
+
+        .faq-item {
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 16px;
+        }
+
+        body.light-mode .faq-item {
+            border-bottom: 1px solid rgba(100, 100, 100, 0.2);
+        }
+
+        .faq-question {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+            user-select: none;
+            transition: color 0.3s ease;
+        }
+
+        body.light-mode .faq-question {
+            color: rgba(50, 50, 50, 0.8);
+        }
+
+        .faq-question:hover {
+            color: #00c8ff;
+        }
+
+        .faq-toggle {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.open .faq-toggle {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
+            padding-top: 0;
+            line-height: 1.6;
+        }
+
+        body.light-mode .faq-answer {
+            color: rgba(50, 50, 50, 0.6);
+        }
+
+        .faq-item.open .faq-answer {
+            max-height: 300px;
+            opacity: 1;
+            padding-top: 16px;
+        }
+
+        /* ===== LOADING STATE ===== */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .loading.show {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0, 200, 255, 0.2);
+            border-top-color: #00c8ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 16px;
+            font-size: 16px;
+            color: #00c8ff;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            padding: 40px 20px;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        body.light-mode .footer {
+            color: rgba(50, 50, 50, 0.5);
+            border-top: 1px solid rgba(100, 100, 100, 0.2);
+        }
+
+        .risk-category {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        body.light-mode .risk-category {
+            background: rgba(100, 100, 100, 0.08);
+            border: 1px solid rgba(100, 100, 100, 0.2);
+        }
+
+        .risk-category h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #00c8ff;
+        }
+
+        body.light-mode .risk-category h3 {
+            color: #0099cc;
+        }
+
+        .risk-category p {
+            font-size: 14px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        body.light-mode .risk-category p {
+            color: rgba(50, 50, 50, 0.7);
+        }
+
+        .prevention-list {
+            list-style: none;
+            margin-top: 15px;
+        }
+
+        .prevention-list li {
+            padding: 10px 0;
+            padding-left: 24px;
+            position: relative;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        body.light-mode .prevention-list li {
+            color: rgba(50, 50, 50, 0.6);
+        }
+
+        .prevention-list li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #00c8ff;
+            font-weight: bold;
+        }
+
+        .results-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .results-buttons button {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .risk-live-region {
+            position: absolute;
+            left: -10000px;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-wrap: wrap;
+                max-width: 90%;
+            }
+
+            .hero-card,
+            .form-card,
+            .results-card,
+            .faq-card {
+                padding: 40px 24px;
+                border-radius: 32px;
+            }
+
+            .hero {
+                padding: 120px 20px 40px;
+            }
+
+            .form-section,
+            .results-section,
+            .faq-section {
+                padding: 120px 20px 40px;
+            }
+
+            .hero-title {
+                font-size: 36px;
+            }
+
+            .form-title {
+                font-size: 24px;
+            }
+
+            .nav-item {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .control-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 14px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .gauge-text {
+                font-size: 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-card,
+            .form-card,
+            .results-card,
+            .faq-card {
+                padding: 30px 16px;
+                border-radius: 24px;
+            }
+
+            .hero-title {
+                font-size: 28px;
+            }
+
+            .hero-subtitle {
+                font-size: 14px;
+            }
+
+            .btn {
+                padding: 12px 24px;
+                font-size: 13px;
+            }
+
+            .form-title {
+                font-size: 20px;
+            }
+
+            .hero-ctas {
+                flex-direction: column;
+            }
+
+            .hero-ctas .btn {
+                width: 100%;
+            }
+
+            .form-buttons {
+                flex-direction: column;
+            }
+
+            .form-buttons button {
+                width: 100%;
+            }
+
+            .results-buttons {
+                flex-direction: column;
+            }
+
+            .results-buttons button {
+                width: 100%;
+            }
+
+            .gauge-text {
+                font-size: 34px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- GALAXY BACKGROUND (REPLACED OLD ANIMATION) -->
+    <div class="galaxy-background" id="galaxyBg"></div>
+
+    <div class="content">
+        <nav class="navbar" role="navigation" aria-label="Main navigation">
+            <button class="nav-item active" data-section="hero" aria-current="page">Home</button>
+            <button class="nav-item" data-section="about" aria-label="About section">About</button>
+            <button class="nav-item" data-section="prediction" aria-label="Prediction form">Prediction</button>
+            <button class="nav-item" data-section="faq" aria-label="FAQ section">FAQ</button>
+            <div class="nav-controls">
+                <button class="control-btn" id="themeToggle" aria-label="Toggle theme">🌙</button>
+            </div>
+        </nav>
+
+        <section id="hero" class="hero" aria-labelledby="heroTitle">
+            <div class="hero-card">
+                <h1 id="heroTitle" class="hero-title">HeartCare AI</h1>
+                <p class="hero-subtitle">Predict your heart attack risk with advanced AI analysis</p>
+                <div class="hero-ctas">
+                    <button class="btn btn-primary" onclick="startPrediction()">Start Prediction</button>
+                    <button class="btn btn-secondary" onclick="navigateToSection('about')">Learn More</button>
+                    <div class="glow-pill"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="form-section" aria-labelledby="aboutTitle">
+            <div class="form-card">
+                <h2 id="aboutTitle" class="form-title">About HeartCare AI</h2>
+                <p class="form-subtitle">How it works</p>
+                <div class="risk-category">
+                    <h3>Our Technology</h3>
+                    <p>HeartCare AI uses machine learning models trained on extensive cardiovascular health data to assess your heart attack risk. Our algorithm analyzes personal health metrics, lifestyle factors, and medical history to provide accurate risk predictions.</p>
+                </div>
+                <div class="risk-category">
+                    <h3>Data Privacy</h3>
+                    <p>Your personal data is processed locally in your browser and never stored on external servers. We prioritize your privacy and security above all else.</p>
+                </div>
+                <div class="risk-category">
+                    <h3>Disclaimer</h3>
+                    <p>This tool is for educational purposes only. Always consult with a healthcare professional for medical advice, diagnosis, or treatment.</p>
+                </div>
+                <div class="form-buttons">
+                    <button class="btn btn-secondary" onclick="navigateToSection('prediction')">Start Assessment</button>
+                    <button class="btn btn-primary" onclick="navigateToSection('hero')">Back Home</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="prediction" class="form-section" aria-labelledby="predictionTitle">
+            <div class="form-card">
+                <h2 id="predictionTitle" class="form-title">Health Assessment</h2>
+                <p class="form-subtitle" id="formStepText">Step 1 of 3</p>
+                <div class="step-indicator">
+                    <div class="step-dot active" id="step-1"></div>
+                    <div class="step-dot" id="step-2"></div>
+                    <div class="step-dot" id="step-3"></div>
+                </div>
+
+                <form id="riskForm" onsubmit="return false;">
+                    <div id="step1" class="form-step active">
+                        <div class="form-group">
+                            <label for="age">Age (15-110 years)</label>
+                            <input type="number" id="age" min="15" max="110" placeholder="Enter your age" required aria-label="Age in years">
+                            <div class="error-text"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="sex">Sex</label>
+                            <select id="sex" required aria-label="Select sex">
+                                <option value="">Choose...</option>
+                                <option value="1">Male</option>
+                                <option value="0">Female</option>
+                            </select>
+                            <div class="error-text"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cp">Chest Pain Type</label>
+                            <select id="cp" required aria-label="Chest pain type">
+                                <option value="">Choose...</option>
+                                <option value="0">Typical Angina</option>
+                                <option value="1">Atypical Angina</option>
+                                <option value="2">Non-anginal Pain</option>
+                                <option value="3">Asymptomatic</option>
+                            </select>
+                            <div class="error-text"></div>
+                        </div>
+                    </div>
+
+                    <div id="step2" class="form-step">
+                        <div class="form-group">
+                            <label for="trestbps">Resting BP Systolic (70-200 mmHg)</label>
+                            <input type="number" id="trestbps" min="70" max="200" placeholder="e.g., 120" required aria-label="Resting blood pressure systolic">
+                            <div class="error-text"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="chol">Cholesterol (100-600 mg/dL)</label>
+                            <input type="number" id="chol" min="100" max="600" placeholder="e.g., 200" required aria-label="Serum cholesterol">
+                            <div class="error-text"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="fbs">Glucose (60-300 mg/dL)</label>
+                            <input type="number" id="fbs" min="60" max="300" placeholder="e.g., 100" required aria-label="Fasting blood glucose">
+                            <div class="error-text"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="restecg">Resting ECG</label>
+                            <select id="restecg" required aria-label="Resting electrocardiographic results">
+                                <option value="">Choose...</option>
+                                <option value="0">Normal</option>
+                                <option value="1">ST-T Wave Abnormality</option>
+                                <option value="2">Left Ventricular Hypertrophy</option>
+                            </select>
+                            <div class="error-text"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="thalach">Max Heart Rate (60-220 bpm)</label>
+                            <input type="number" id="thalach" min="60" max="220" placeholder="e.g., 150" required aria-label="Maximum heart rate achieved">
+                            <div class="error-text"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="oldpeak">Oldpeak (0.0-6.5)</label>
+                            <input type="number" id="oldpeak" min="0" max="6.5" step="0.1" placeholder="e.g., 1.0" required aria-label="ST depression induced by exercise">
+                            <div class="error-text"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="slope">ST Slope</label>
+                            <select id="slope" required aria-label="Slope of peak exercise ST segment">
+                                <option value="">Choose...</option>
+                                <option value="0">Upsloping</option>
+                                <option value="1">Flat</option>
+                                <option value="2">Downsloping</option>
+                            </select>
+                            <div class="error-text"></div>
+                        </div>
+                    </div>
+
+                    <div id="step3" class="form-step">
+                        <div class="form-group">
+                            <label for="exang">Exercise Induced Angina</label>
+                            <select id="exang" required aria-label="Exercise induced angina">
+                                <option value="">Choose...</option>
+                                <option value="0">No</option>
+                                <option value="1">Yes</option>
+                            </select>
+                            <div class="error-text"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-buttons">
+                        <button type="button" class="btn btn-secondary" id="prevBtn" onclick="previousStep()" style="display: none;">← Previous</button>
+                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="nextStep()">Next →</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section id="results" class="results-section" aria-labelledby="resultsTitle">
+            <div class="results-card">
+                <h2 id="resultsTitle" class="form-title">Your Risk Assessment</h2>
+                <div class="risk-gauge-container">
+                    <div class="gauge-wrapper">
+                        <svg class="gauge-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Risk gauge visualization">
+                            <defs>
+                                <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#0ea5ff;stop-opacity:1" />
+                                    <stop offset="50%" style="stop-color:#fbbf24;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#ef4444;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <circle class="gauge-circle" cx="100" cy="100" r="80" style="stroke-dasharray: 0, 503; stroke-dashoffset: 0;"></circle>
+                            <text class="gauge-text" id="riskPercentage" x="100" y="85" aria-live="polite" aria-atomic="true">0%</text>
+                            <text class="gauge-label" id="riskLabel" x="100" y="125">Low Risk</text>
+                        </svg>
+                    </div>
+                </div>
+                <div id="riskSummary"></div>
+                <div aria-live="polite" aria-atomic="true" class="risk-live-region" id="riskLiveRegion"></div>
+                <div class="results-buttons">
+                    <button class="btn btn-secondary" onclick="downloadReport()">📥 Download Report</button>
+                    <button class="btn btn-primary" onclick="resetForm()">← Start Over</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="faq" class="faq-section" aria-labelledby="faqTitle">
+            <div class="faq-card">
+                <h2 id="faqTitle" class="form-title">Frequently Asked Questions</h2>
+                <p class="form-subtitle">Common questions about HeartCare AI</p>
+                
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>What is HeartCare AI?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        HeartCare AI is an educational tool that uses machine learning to estimate your heart attack risk based on clinical health metrics and symptoms. It is not a substitute for professional medical advice.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Is my data safe?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Yes, all your data is processed locally in your browser. We do not send any information to external servers or store personal data. Your privacy is our priority.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>How accurate is the risk assessment?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Our model is trained on extensive cardiovascular research data. However, this is an educational tool and should not be used as your only source for health decisions. Always consult a healthcare professional.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>What can I do to reduce my risk?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Common strategies include regular exercise, healthy diet, managing stress, quitting smoking, controlling blood pressure and cholesterol, and getting regular health checkups with your doctor.
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <div class="faq-question" onclick="toggleFAQ(this)">
+                        <span>Should I share this with my doctor?</span>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        Yes, we encourage you to share this assessment with your healthcare provider. It can be a useful conversation starter about your cardiovascular health and personalized prevention strategies.
+                    </div>
+                </div>
+
+                <div class="form-buttons" style="margin-top: 40px;">
+                    <button class="btn btn-primary" onclick="navigateToSection('prediction')">Try Assessment</button>
+                    <button class="btn btn-secondary" onclick="navigateToSection('hero')">Back Home</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p>&copy; 2025 HeartCare AI. For educational purposes only. Always consult healthcare professionals.</p>
+        </footer>
+    </div>
+
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Analyzing your health data...</div>
+    </div>
+</body>
+</html>
